@@ -1,0 +1,66 @@
+﻿@page "/"
+@using VideoHostingApp.Models
+@using VideoHostingApp.Services
+@inject VideoService VideoService
+@inject ILogger<VideoList> Logger
+
+<h3>Список видеофайлов</h3>
+
+@if (videos == null)
+{
+    <p>Загрузка списка...</p>
+}
+else if (!videos.Any())
+{
+    <p>В папке не найдено видеофайлов (.mp4).</p>
+}
+else
+{
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="list-group">
+                @foreach (var video in videos)
+                {
+                    <button type="button"
+                            class="list-group-item list-group-item-action h6 @(selectedVideo?.Name == video.Name ? "active" : "")"
+                            @onclick="() => SelectVideo(video)">
+                        @video.Name
+                        @* <small class="text-muted">(@video.FormattedSize)</small> *@
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            @if (selectedVideo != null)
+            {
+                <div class="card position-fixed">
+                    <div class="card-header">
+                        <strong>Сейчас проигрывается:</strong> @selectedVideo.Name
+                    </div>
+                    <div class="card-body">
+                        <video id="videoPlayer"
+                               controls
+                               autoplay
+                               muted
+                               style="width: 100%; max-height: 500px;"
+                               @key="selectedVideo?.Name">
+                            @* <- ключ на основе имени видео *@
+                            <source src="@GetVideoUrl(selectedVideo.FullPath)" type="video/mp4">
+                            Ваш браузер не поддерживает тег video.
+                        </video>
+                    </div>
+                    <button class="btn btn-secondary mt-3" @onclick="RefreshList">Обновить список</button>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Выберите видео из списка слева для просмотра.
+                </div>
+            }
+        </div>
+    </div>
+}
+
